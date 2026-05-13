@@ -1,0 +1,145 @@
+{
+  "entities": {
+    "Artwork": {
+      "title": "Artwork",
+      "description": "A piece of art listed in the gallery",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the artwork" },
+        "artist": { "type": "string", "description": "Name of the artist" },
+        "artistId": { "type": "string", "description": "UID of the artist" },
+        "isVerified": { "type": "boolean", "description": "Whether the artist is verified" },
+        "status": { "type": "string", "enum": ["available", "sold"] },
+        "medium": { "type": "string", "description": "Creative medium" },
+        "price": { "type": "string", "description": "Price in USD" },
+        "image": { "type": "string", "description": "URL to the artwork image" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["title", "artist", "price", "image", "createdAt"]
+    },
+    "Application": {
+      "title": "Artist Application",
+      "description": "An application from an artist to join Artplug",
+      "type": "object",
+      "properties": {
+        "artistName": { "type": "string", "description": "Artist or Studio name" },
+        "portfolioLink": { "type": "string", "description": "Link to Instagram/Behance" },
+        "creativeMedium": { "type": "string", "description": "Primary medium of work" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Current status of the application" },
+        "userId": { "type": "string", "description": "The UID of the user who applied" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Application timestamp" }
+      },
+      "required": ["artistName", "portfolioLink", "creativeMedium", "status", "userId", "createdAt"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "Profile information for buyers and artists",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["buyer", "artist", "admin"] },
+        "isVerified": { "type": "boolean", "description": "Whether the artist is verified" },
+        "socialLinks": {
+          "type": "object",
+          "properties": {
+            "instagram": { "type": "string" },
+            "twitter": { "type": "string" },
+            "website": { "type": "string" },
+            "x": { "type": "string" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "role", "createdAt"]
+    },
+    "Sale": {
+      "title": "Sale Record",
+      "description": "A record of a successful art sale",
+      "type": "object",
+      "properties": {
+        "artworkId": { "type": "string" },
+        "title": { "type": "string" },
+        "artist": { "type": "string" },
+        "artistId": { "type": "string" },
+        "price": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["artworkId", "title", "artist", "artistId", "price", "buyerId", "buyerEmail", "createdAt"]
+    },
+    "Follower": {
+      "title": "Follower Record",
+      "description": "A record of a user following an artist",
+      "type": "object",
+      "properties": {
+        "followerId": { "type": "string" },
+        "followerName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["followerId", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A feedback or comment on an artist or artwork",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "targetId": { "type": "string", "description": "ID of the artist or artwork being commented on" },
+        "targetType": { "type": "string", "enum": ["artist", "artwork"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["text", "authorId", "targetId", "targetType", "createdAt"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "A request for a commission or appointment with an artist",
+      "type": "object",
+      "properties": {
+        "artistId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "service": { "type": "string", "description": "Type of service or commission requested" },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "date": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["artistId", "clientId", "service", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "artworks/{artworkId}": {
+      "schema": "Artwork",
+      "description": "Public gallery artworks"
+    },
+    "applications/{applicationId}": {
+      "schema": "Application",
+      "description": "Artist applications for review"
+    },
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "users/{userId}/followers/{followerId}": {
+      "schema": "Follower",
+      "description": "List of followers for an artist"
+    },
+    "sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Transaction history"
+    },
+    "comments/{commentId}": {
+      "schema": "Comment",
+      "description": "User feedback"
+    },
+    "bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Artist appointments and commissions"
+    }
+  }
+}

@@ -1,0 +1,189 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      // For this app, we'll assume a dedicated 'admins' collection or a specific email check for the developer
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'coopedill@gmail.com'
+      );
+    }
+
+    // --- Entity Validations ---
+
+    function isValidArtwork(data) {
+      return data.keys().hasAll(['title', 'artist', 'artistId', 'status', 'price', 'image', 'medium', 'createdAt']) &&
+             (data.keys().size() == 8 || (data.keys().size() == 9 && data.isVerified is bool)) &&
+             data.title is string && data.title.size() <= 100 &&
+             data.artist is string && data.artist.size() <= 100 &&
+             data.artistId == request.auth.uid &&
+             data.status in ['available', 'sold'] &&
+             data.price is string && data.price.size() <= 20 &&
+             data.image is string && data.image.size() <= 500 &&
+             data.medium is string && data.medium.size() <= 100 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidApplication(data) {
+      return data.keys().hasAll(['artistName', 'portfolioLink', 'creativeMedium', 'status', 'userId', 'createdAt']) &&
+             data.keys().size() == 6 &&
+             data.artistName is string && data.artistName.size() <= 100 &&
+             data.portfolioLink is string && data.portfolioLink.size() <= 200 &&
+             data.creativeMedium is string &&
+             data.status in ['pending', 'approved', 'rejected'] &&
+             data.userId == request.auth.uid &&
+             data.createdAt == request.time;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['displayName', 'email', 'role', 'createdAt']) &&
+             (data.keys().size() >= 4 && data.keys().size() <= 8) &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.role in ['buyer', 'artist'] && // Admins can't self-promote
+             (!data.keys().hasAny(['isVerified']) || data.isVerified is bool) &&
+             (!data.keys().hasAny(['socialLinks']) || data.socialLinks is map) &&
+             (!data.keys().hasAny(['bio']) || (data.bio is string && data.bio.size() <= 2000)) &&
+             (!data.keys().hasAny(['photoURL']) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSale(data) {
+      return data.keys().hasAll(['artworkId', 'title', 'artist', 'artistId', 'price', 'buyerId', 'buyerEmail', 'createdAt']) &&
+             data.keys().size() == 8 &&
+             data.artworkId is string &&
+             data.title is string &&
+             data.artist is string &&
+             data.artistId is string &&
+             data.price is string &&
+             data.buyerId == request.auth.uid &&
+             data.buyerEmail == request.auth.token.email &&
+             data.createdAt == request.time;
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['text', 'authorId', 'authorName', 'targetId', 'targetType', 'createdAt']) &&
+             data.keys().size() == 6 &&
+             data.text is string && data.text.size() <= 1000 &&
+             data.authorId == request.auth.uid &&
+             data.targetType in ['artist', 'artwork'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll(['artistId', 'clientId', 'clientName', 'clientEmail', 'service', 'status', 'createdAt']) &&
+             (data.keys().size() >= 7 && data.keys().size() <= 9) &&
+             data.artistId is string &&
+             data.clientId == request.auth.uid &&
+             (!data.keys().hasAny(['date']) || data.date is timestamp) &&
+             data.status in ['pending', 'confirmed', 'completed', 'cancelled'] &&
+             data.createdAt == request.time;
+    }
+
+    // --- Collection Rules ---
+
+    // Artworks: Read by everyone, write by admins or owner artist
+    match /artworks/{artworkId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isValidArtwork(incoming());
+      allow update: if isAdmin() || (isSignedIn() && isOwner(existing().artistId) && isValidArtwork(incoming()));
+      allow delete: if isAdmin() || (isSignedIn() && isOwner(existing().artistId));
+    }
+
+    // Applications: Private to owner and admin
+    match /applications/{applicationId} {
+      allow get: if isOwner(existing().userId) || isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      
+      allow create: if isSignedIn() && 
+                      isValidId(applicationId) && 
+                      isValidApplication(incoming()) && 
+                      incoming().status == 'pending'; // Force pending on create
+      
+      allow update: if isAdmin() && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+                      incoming().status in ['approved', 'rejected'];
+                      
+      allow delete: if isAdmin();
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin() || (resource.data.role == 'artist');
+      allow create: if isOwner(userId) && isValidUser(incoming()) && !incoming().keys().hasAny(['isVerified']);
+      allow update: if (isOwner(userId) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'socialLinks', 'bio', 'photoURL']) &&
+                      (incoming().get('socialLinks', null) == null || incoming().socialLinks is map)) ||
+                      (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['isVerified']));
+      allow delete: if isAdmin();
+
+      // Followers subcollection
+      match /followers/{followerId} {
+        allow get: if isSignedIn();
+        allow list: if isSignedIn(); // Can list followers of an artist
+        allow create: if isOwner(followerId) && // Only follow yourself
+                        incoming().keys().hasAll(['followerId', 'createdAt']) &&
+                        incoming().followerId == request.auth.uid &&
+                        incoming().createdAt == request.time;
+        allow delete: if isOwner(followerId); // Only unfollow yourself
+        allow update: if false; // Status of following is immutable
+      }
+    }
+
+    // Sales Records
+    match /sales/{saleId} {
+      allow get: if isAdmin() || isOwner(existing().buyerId) || isOwner(existing().artistId);
+      allow list: if isAdmin() || (isSignedIn() && (resource.data.buyerId == request.auth.uid || resource.data.artistId == request.auth.uid));
+      allow create: if isSignedIn() && isValidSale(incoming());
+      allow update, delete: if false; // Sales are immutable
+    }
+
+    // Comments
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidComment(incoming());
+      allow update: if isOwner(existing().authorId) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['text']) &&
+                      incoming().text is string;
+      allow delete: if isOwner(existing().authorId) || isAdmin();
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow get: if isOwner(existing().clientId) || isOwner(existing().artistId) || isAdmin();
+      allow list: if isSignedIn() && (resource.data.clientId == request.auth.uid || resource.data.artistId == request.auth.uid);
+      allow create: if isSignedIn() && isValidBooking(incoming()) && incoming().status == 'pending';
+      allow update: if (isOwner(existing().artistId) || isAdmin()) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+                      incoming().status in ['confirmed', 'completed', 'cancelled'];
+      allow delete: if isAdmin();
+    }
+  }
+}
