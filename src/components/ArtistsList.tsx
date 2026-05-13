@@ -28,10 +28,9 @@ interface ArtistWithWorks {
 interface ArtistsListProps {
   onArtistClick: (id: string, name: string) => void;
   onBrowseGallery: () => void;
-  onJoin: () => void;
 }
 
-export default function ArtistsList({ onArtistClick, onBrowseGallery, onJoin }: ArtistsListProps) {
+export default function ArtistsList({ onArtistClick, onBrowseGallery }: ArtistsListProps) {
   const [artists, setArtists] = useState<ArtistWithWorks[]>([]);
   const [loading, setLoading] = useState(true);
 

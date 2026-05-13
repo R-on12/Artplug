@@ -70,19 +70,12 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
           Artists
         </button>
         
-        {isArtist ? (
+        {isArtist && (
           <button 
             onClick={() => setView('artist-dashboard')} 
             className={`hover:text-brand-blue transition relative pb-1 ${currentView === 'artist-dashboard' ? 'text-brand-blue border-b-2 border-brand-blue' : ''}`}
           >
             My Studio
-          </button>
-        ) : (
-          <button 
-            onClick={() => setView('onboard')} 
-            className={`hover:text-brand-blue transition relative pb-1 ${currentView === 'onboard' ? 'text-brand-blue border-b-2 border-brand-blue' : ''}`}
-          >
-            Join
           </button>
         )}
 
@@ -119,12 +112,20 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
             />
           </div>
         ) : (
-          <button 
-            onClick={onLogin}
-            className="hidden sm:block bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 transition shadow-lg shadow-gray-200 uppercase text-[10px] font-bold tracking-widest"
-          >
-            Log In
-          </button>
+          <div className="flex items-center gap-3 sm:gap-6">
+            <button 
+              onClick={onLogin}
+              className="text-[10px] font-black tracking-widest text-gray-400 hover:text-black transition-colors uppercase"
+            >
+              Log In
+            </button>
+            <button 
+              onClick={onLogin}
+              className="bg-slate-900 text-white px-6 py-3 rounded-2xl hover:bg-brand-blue transition-all shadow-xl shadow-slate-200 uppercase text-[10px] font-black tracking-widest active:scale-95"
+            >
+              Sign Up
+            </button>
+          </div>
         )}
 
         {user && (

@@ -44,7 +44,7 @@ const MOCK_ARTWORKS = [
 ];
 
 export default function App() {
-  const [view, setView] = useState<'gallery' | 'onboard' | 'profile' | 'admin' | 'checkout' | 'artist-dashboard' | 'artist-profile' | 'artists-list'>('gallery');
+  const [view, setView] = useState<'gallery' | 'profile' | 'admin' | 'checkout' | 'artist-dashboard' | 'artist-profile' | 'artists-list'>('gallery');
   const [user, setUser] = useState<User | null>(null);
   const [artistApp, setArtistApp] = useState<{ status: string } | null>(null);
   const [selectedArtist, setSelectedArtist] = useState<{ id: string, name: string } | null>(null);
@@ -301,141 +301,6 @@ export default function App() {
 
             </div>
           </motion.main>
-        ) : view === 'onboard' ? (
-          <motion.main 
-            key="onboard"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="max-w-xl mx-auto px-6 py-20 md:py-32 min-h-[calc(100vh-160px)]"
-          >
-            <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-brand-blue text-[10px] font-black uppercase tracking-[0.2em] mb-6">Artist Registration</span>
-              <h2 className="text-4xl md:text-6xl font-display font-black mb-6 tracking-tight text-black">Apply to the Collective<span className="text-brand-blue">.</span></h2>
-              <p className="text-gray-400 text-lg md:text-xl font-light max-w-lg mx-auto">
-                Join an exclusive community of visionaries. Our curators review every application to ensure the highest standard of excellence.
-              </p>
-            </div>
-            
-            {submitted ? (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100"
-              >
-                <div className="w-20 h-20 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Application Received</h3>
-                <p className="text-gray-500">We'll review your portfolio and get back to you soon.</p>
-                <button 
-                  onClick={() => setSubmitted(false)}
-                  className="mt-8 text-brand-blue font-bold uppercase tracking-widest text-[10px] hover:underline"
-                >
-                  Send another
-                </button>
-              </motion.div>
-            ) : (
-              <motion.form 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-6 bg-white p-8 md:p-10 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100"
-                onSubmit={handleApply}
-              >
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Artist Name / Studio</label>
-                  <input 
-                    required
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    type="text" 
-                    className="w-full border-2 border-gray-50 bg-gray-50/50 p-4 rounded-xl focus:border-brand-blue focus:bg-white outline-none transition-all duration-300" 
-                    placeholder="How should we call you?" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Upload Sample of Work (via Cloudinary Plug)</label>
-                  <div className="relative group/upload">
-                    <input 
-                      type="file" 
-                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          // Simulate Cloudinary Signature & Upload
-                          fetch('/api/cloudinary-signature')
-                            .then(res => res.json())
-                            .then(() => {
-                              window.alert(`Cloudinary Signature Verified.\nUploading "${file.name}" secure bypass to Artplug Shield.\nWatermark applied automatically.`);
-                            });
-                        }
-                      }}
-                    />
-                    <div className="w-full border-2 border-dashed border-gray-100 bg-gray-50/50 p-8 rounded-xl group-hover/upload:border-brand-blue/30 group-hover/upload:bg-blue-50/10 transition-all text-center">
-                      <p className="text-sm font-medium text-gray-400">Drag & drop or <span className="text-brand-blue">browse files</span></p>
-                      <p className="text-[9px] text-gray-300 mt-1 uppercase tracking-widest">Supports Hi-Res PNG, JPG (Watermark active)</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Portfolio Link</label>
-                  <input 
-                    required
-                    value={portfolioLink}
-                    onChange={(e) => setPortfolioLink(e.target.value)}
-                    type="url" 
-                    className="w-full border-2 border-gray-50 bg-gray-50/50 p-4 rounded-xl focus:border-brand-blue focus:bg-white outline-none transition-all duration-300" 
-                    placeholder="https://behance.net/you" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Creative Medium</label>
-                  <select 
-                    value={creativeMedium}
-                    onChange={(e) => setCreativeMedium(e.target.value)}
-                    className="w-full border-2 border-gray-50 bg-gray-50/50 p-4 rounded-xl focus:border-brand-blue focus:bg-white outline-none transition-all duration-300 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_1rem_center] bg-no-repeat"
-                  >
-                    <option value="" disabled>Select your primary medium</option>
-                    <optgroup label="Traditional Painting">
-                      <option>Pencil Art</option>
-                      <option>Pastel Art</option>
-                      <option>Water colour Art</option>
-                      <option>Acrylic Painting</option>
-                      <option>Oil Painting</option>
-                    </optgroup>
-                    <option>Contemporary Arts</option>
-                    <optgroup label="Digital & Other">
-                      <option>Digital Painting</option>
-                      <option>3D / Motion Graphics</option>
-                      <option>Generative Art</option>
-                      <option>Photography</option>
-                    </optgroup>
-                  </select>
-                </div>
-                {!user && (
-                  <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl text-amber-800 text-[10px] font-bold uppercase tracking-wider">
-                    Please log in to submit your application.
-                  </div>
-                )}
-                <div className="pt-4">
-                  <button 
-                    disabled={submitting || !user}
-                    type="submit" 
-                    className="w-full bg-brand-blue text-white font-bold py-5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase text-[10px] tracking-widest text-center"
-                  >
-                    {submitting ? 'Submitting...' : 'Apply for Gallery Space'}
-                  </button>
-                </div>
-              </motion.form>
-            )}
-            
-            <p className="mt-8 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Applications are reviewed weekly. Quality above all.
-            </p>
-          </motion.main>
         ) : view === 'profile' && user ? (
           <Profile user={user} />
         ) : view === 'admin' && user && user.email === 'coopedill@gmail.com' ? (
@@ -463,7 +328,6 @@ export default function App() {
               setView('artist-profile');
             }}
             onBrowseGallery={() => setView('gallery')}
-            onJoin={() => setView('onboard')}
           />
         ) : view === 'checkout' && selectedArtwork ? (
           <Checkout 
