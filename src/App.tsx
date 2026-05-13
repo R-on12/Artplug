@@ -144,8 +144,15 @@ export default function App() {
   const handleLogin = async () => {
     try {
       await signIn();
-    } catch (error) {
-      alert('Login failed. Please check your connection.');
+    } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        console.error('Popup blocked');
+        // We could also set a state to show a UI message instead of alert
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        console.log('Login cancelled');
+      } else {
+        console.error('Login error:', error);
+      }
     }
   };
 

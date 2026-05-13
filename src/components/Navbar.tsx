@@ -17,7 +17,7 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex items-center gap-3 text-3xl font-display font-black tracking-tighter text-black cursor-pointer group"
+        className="flex items-center gap-2 md:gap-3 text-2xl md:text-3xl font-display font-black tracking-tighter text-black cursor-pointer group shrink-0"
         onClick={() => setView('gallery')}
       >
         <div className="relative w-8 h-8 flex items-center justify-center">
@@ -55,7 +55,7 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
         <span>ARTPLUG<span className="text-brand-blue">.</span></span>
       </motion.div>
       
-      <div className="flex items-center space-x-6 md:space-x-10 font-bold text-xs uppercase tracking-[0.2em] text-gray-500">
+      <div className="flex items-center space-x-4 md:space-x-10 font-bold text-[9px] md:text-xs uppercase tracking-[0.1em] md:tracking-[0.2em] text-gray-500">
         <button 
           onClick={() => setView('gallery')} 
           className={`hover:text-black transition relative pb-1 ${currentView === 'gallery' ? 'text-black border-b-2 border-black' : ''}`}
@@ -112,16 +112,16 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
             />
           </div>
         ) : (
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-6">
             <button 
               onClick={onLogin}
-              className="text-[10px] font-black tracking-widest text-gray-400 hover:text-black transition-colors uppercase"
+              className="text-[9px] sm:text-[10px] font-black tracking-widest text-gray-400 hover:text-black transition-colors uppercase whitespace-nowrap"
             >
               Log In
             </button>
             <button 
               onClick={onLogin}
-              className="bg-slate-900 text-white px-6 py-3 rounded-2xl hover:bg-brand-blue transition-all shadow-xl shadow-slate-200 uppercase text-[10px] font-black tracking-widest active:scale-95"
+              className="bg-slate-900 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl hover:bg-brand-blue transition-all shadow-xl shadow-slate-200 uppercase text-[9px] sm:text-[10px] font-black tracking-widest active:scale-95 whitespace-nowrap"
             >
               Sign Up
             </button>

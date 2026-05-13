@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User, browserPopupRedirectResolver } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -8,13 +8,26 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
+let isSigningIn = false;
+
 export async function signIn() {
+  if (isSigningIn) return;
+  isSigningIn = true;
+  
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
     return result.user;
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (error: any) {
+    if (error.code === 'auth/popup-blocked') {
+      console.error('Login error: Popup was blocked by the browser. Please allow popups for this site.');
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      console.warn('Login error: Popup request was cancelled.');
+    } else {
+      console.error('Login error:', error);
+    }
     throw error;
+  } finally {
+    isSigningIn = false;
   }
 }
 
