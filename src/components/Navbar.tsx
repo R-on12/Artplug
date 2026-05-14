@@ -63,12 +63,14 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
           Gallery
         </button>
 
-        <button 
-          onClick={() => setView('artists-list')} 
-          className={`hover:text-black transition relative pb-1 ${currentView === 'artists-list' ? 'text-black border-b-2 border-black' : ''}`}
-        >
-          Artists
-        </button>
+        {isArtist && (
+          <button 
+            onClick={() => setView('artists-list')} 
+            className={`hover:text-black transition relative pb-1 ${currentView === 'artists-list' ? 'text-black border-b-2 border-black' : ''}`}
+          >
+            Artists
+          </button>
+        )}
         
         {isArtist && (
           <button 
