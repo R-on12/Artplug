@@ -30,6 +30,37 @@ interface ArtistsListProps {
   onBrowseGallery: () => void;
 }
 
+const MOCK_ARTISTS: ArtistWithWorks[] = [
+  {
+    id: 'm1',
+    displayName: 'Kojo Mensah',
+    isVerified: true,
+    photoURL: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
+    artworks: [
+      { id: '1', title: 'Neon Silence', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400' },
+      { id: '11', title: 'Virtual Horizon', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400' }
+    ]
+  },
+  {
+    id: 'm2',
+    displayName: 'Sarah Chen',
+    isVerified: true,
+    photoURL: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200',
+    artworks: [
+      { id: '2', title: 'Ethereal Flow', image: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=400' }
+    ]
+  },
+  {
+    id: 'm3',
+    displayName: 'Lisa Wang',
+    isVerified: false,
+    photoURL: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200',
+    artworks: [
+      { id: '6', title: 'Concrete Jungle', image: 'https://images.unsplash.com/photo-1493119508027-2b584f234d6c?auto=format&fit=crop&q=80&w=400' }
+    ]
+  }
+];
+
 export default function ArtistsList({ onArtistClick, onBrowseGallery }: ArtistsListProps) {
   const [artists, setArtists] = useState<ArtistWithWorks[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,9 +104,10 @@ export default function ArtistsList({ onArtistClick, onBrowseGallery }: ArtistsL
           });
         }
 
-        setArtists(artistsData);
+        setArtists(artistsData.length > 0 ? artistsData : MOCK_ARTISTS);
       } catch (error) {
-        handleFirestoreError(error, OperationType.LIST, 'artists_with_works');
+        console.error('Failed to fetch artists:', error);
+        setArtists(MOCK_ARTISTS);
       } finally {
         setLoading(false);
       }

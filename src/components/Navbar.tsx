@@ -17,42 +17,53 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex items-center gap-2 md:gap-3 text-2xl md:text-3xl font-display font-black tracking-tighter text-black cursor-pointer group shrink-0"
+        className="relative flex items-center gap-2 md:gap-3 text-2xl md:text-3xl font-display font-black tracking-tighter text-black cursor-pointer group shrink-0"
         onClick={() => setView('gallery')}
       >
-        <div className="relative w-8 h-8 flex items-center justify-center">
+        <div className="relative w-10 h-10 flex items-center justify-center z-20">
           <motion.div
             animate={{ 
-              rotate: [0, -20, 20, 0],
-              x: [0, -5, 5, 0],
-              y: [0, 2, -2, 0]
+              rotate: [15, -45, 15],
+              x: [0, -10, 0],
+              y: [0, 5, 0]
             }}
             transition={{
               duration: 3,
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="text-brand-blue relative z-10"
+            className="relative z-10"
           >
-            <Paintbrush size={24} />
+            {/* The Brush Body */}
+            <Paintbrush 
+              size={28} 
+              className="text-slate-900 group-hover:text-amber-900 transition-colors" 
+              strokeWidth={2.5}
+            />
+            
+            {/* Handle segment (Wood color) */}
+            <div className="absolute top-[40%] left-[40%] w-[40%] h-[40%] bg-amber-700/20 rounded-full blur-[2px] -z-10" />
           </motion.div>
-          {/* Animated Paint Stroke */}
+        </div>
+        <div className="relative group-hover:drop-shadow-sm transition-all">
+          <span>ARTPLUG<span className="text-brand-blue">.</span></span>
+          {/* Artistic Paint Stroke passing through the text */}
           <motion.div 
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ 
               scaleX: [0, 1, 1, 0],
-              opacity: [0, 0.8, 0.8, 0],
-              x: [-10, 0, 5, 10]
+              opacity: [0, 0.4, 0.4, 0],
+              x: [-60, -20, 20, 60],
+              backgroundColor: ["#3b82f6", "#8b5cf6", "#ec4899", "#ef4444", "#3b82f6"]
             }}
             transition={{
               duration: 3,
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute bottom-1 left-0 w-full h-1.5 bg-brand-blue rounded-full origin-left blur-[1px]"
+            className="absolute bottom-1 left-0 w-[120%] h-2 rounded-full origin-left blur-[3px] opacity-30 pointer-events-none -z-10"
           />
         </div>
-        <span>ARTPLUG<span className="text-brand-blue">.</span></span>
       </motion.div>
       
       <div className="flex items-center space-x-4 md:space-x-10 font-bold text-[9px] md:text-xs uppercase tracking-[0.1em] md:tracking-[0.2em] text-gray-500">
