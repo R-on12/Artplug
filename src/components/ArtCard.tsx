@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { auth } from '../lib/firebase';
 import { BadgeCheck } from 'lucide-react';
+import { formatPrice } from '../lib/currency';
 
 interface ArtCardProps {
   id: number | string;
@@ -11,11 +12,12 @@ interface ArtCardProps {
   isVerified?: boolean;
   price: string;
   image: string;
+  currencyCode?: string;
   onBuy?: () => void;
   onArtistClick?: (id: string, name: string) => void;
 }
 
-const ArtCard: React.FC<ArtCardProps> = ({ id, title, artist, artistId, isVerified, price, image, onBuy, onArtistClick }) => {
+const ArtCard: React.FC<ArtCardProps> = ({ id, title, artist, artistId, isVerified, price, image, currencyCode = 'USD', onBuy, onArtistClick }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +41,7 @@ const ArtCard: React.FC<ArtCardProps> = ({ id, title, artist, artistId, isVerifi
         />
         <div className="absolute top-4 right-4">
           <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase text-black shadow-sm">
-            ${price}
+            {formatPrice(price, currencyCode)}
           </span>
         </div>
       </div>

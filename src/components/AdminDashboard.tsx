@@ -13,6 +13,7 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { CURRENCY_RATES, formatPrice } from '../lib/currency';
 import { 
   Users, 
   ShoppingBag, 
@@ -26,15 +27,10 @@ import {
   DollarSign,
   BadgeCheck,
   Search,
-  Loader2
+  Loader2,
+  Settings
 } from 'lucide-react';
-
-const CURRENCY_RATES: Record<string, { rate: number; symbol: string; name: string }> = {
-  USD: { rate: 1.0, symbol: '$', name: 'Dollar' },
-  GHS: { rate: 14.50, symbol: 'GH₵', name: 'Cedis' },
-  EUR: { rate: 0.92, symbol: '€', name: 'Euro' },
-  GBP: { rate: 0.79, symbol: '£', name: 'Pound' }
-};
+import { setDoc } from 'firebase/firestore';
 
 interface Application {
   id: string;
@@ -60,6 +56,7 @@ export default function AdminDashboard() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState('USD');
+  const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false);
   const [artists, setArtists] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
@@ -87,6 +84,11 @@ export default function AdminDashboard() {
       const artistSnapshot = await getDocs(artistQuery);
       setArtists(artistSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
 
+      // Fetch Platform Settings
+      const settingsSnapshot = await getDocs(collection(db, 'settings'));
+      const currencySetting = settingsSnapshot.docs.find(d => d.id === 'platform')?.data()?.currency;
+      if (currencySetting) setCurrency(currencySetting);
+
       // Calculate Stats
       const revenue = salesData.reduce((acc, sale) => acc + parseFloat(sale.price.replace(',', '')), 0);
       setStats({
@@ -99,6 +101,20 @@ export default function AdminDashboard() {
       handleFirestoreError(error, OperationType.LIST, 'admin_data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    setIsUpdatingCurrency(true);
+    try {
+      await setDoc(doc(db, 'settings', 'platform'), {
+        currency: newCurrency
+      }, { merge: true });
+      setCurrency(newCurrency);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'settings/platform');
+    } finally {
+      setIsUpdatingCurrency(false);
     }
   };
 
@@ -173,10 +189,8 @@ export default function AdminDashboard() {
     }
   };
 
-  const formatPrice = (priceStr: string) => {
-    const basePrice = parseFloat(priceStr.replace(/,/g, ''));
-    const converted = basePrice * CURRENCY_RATES[currency].rate;
-    return `${CURRENCY_RATES[currency].symbol}${converted.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const formatPriceLocal = (priceStr: string) => {
+    return formatPrice(priceStr, currency);
   };
 
   if (loading) {
@@ -196,11 +210,16 @@ export default function AdminDashboard() {
         </div>
         
         <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-          <DollarSign size={16} className="ml-2 text-gray-400" />
+          {isUpdatingCurrency ? (
+            <Loader2 size={16} className="ml-2 text-brand-blue animate-spin" />
+          ) : (
+            <DollarSign size={16} className="ml-2 text-gray-400" />
+          )}
           <select 
             value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-            className="bg-transparent border-none outline-none text-xs font-bold uppercase tracking-widest text-slate-900 pr-8 cursor-pointer"
+            onChange={(e) => handleCurrencyChange(e.target.value)}
+            disabled={isUpdatingCurrency}
+            className="bg-transparent border-none outline-none text-xs font-bold uppercase tracking-widest text-slate-900 pr-8 cursor-pointer disabled:opacity-50"
           >
             {Object.keys(CURRENCY_RATES).map(code => (
               <option key={code} value={code}>{code} - {CURRENCY_RATES[code].name}</option>
@@ -218,7 +237,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Estimated Revenue</p>
-          <h2 className="text-3xl font-display font-black text-slate-900 mt-1">{formatPrice(stats.totalRevenue.toString())}</h2>
+          <h2 className="text-3xl font-display font-black text-slate-900 mt-1">{formatPriceLocal(stats.totalRevenue.toString())}</h2>
         </div>
 
         <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
@@ -352,7 +371,7 @@ export default function AdminDashboard() {
                         <p className="text-xs text-slate-600">{sale.buyerEmail}</p>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <p className="font-bold text-slate-900 text-sm">{formatPrice(sale.price)}</p>
+                        <p className="font-bold text-slate-900 text-sm">{formatPriceLocal(sale.price)}</p>
                       </td>
                     </tr>
                   ))

@@ -36,6 +36,7 @@ import ArtCard from './ArtCard';
 interface ArtistProfileProps {
   artistId: string;
   artistName: string;
+  currencyCode?: string;
   onBack: () => void;
   onBuy: (artwork: any) => void;
 }
@@ -61,7 +62,7 @@ interface Comment {
   createdAt: any;
 }
 
-export default function ArtistProfile({ artistId, artistName, onBack, onBuy }: ArtistProfileProps) {
+export default function ArtistProfile({ artistId, artistName, currencyCode = 'USD', onBack, onBuy }: ArtistProfileProps) {
   const [artworks, setArtworks] = useState<any[]>([]);
   const [artistProfile, setArtistProfile] = useState<ArtistUser | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -415,6 +416,7 @@ export default function ArtistProfile({ artistId, artistName, onBack, onBuy }: A
               <ArtCard 
                 key={art.id}
                 {...art}
+                currencyCode={currencyCode}
                 onBuy={() => onBuy(art)}
               />
             ))}

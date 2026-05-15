@@ -106,6 +106,12 @@ service cloud.firestore {
              data.createdAt == request.time;
     }
 
+    function isValidSettings(data) {
+      return data.keys().hasAll(['currency']) &&
+             data.keys().size() == 1 &&
+             data.currency in ['USD', 'GHS', 'EUR', 'GBP'];
+    }
+
     // --- Collection Rules ---
 
     // Artworks: Read by everyone, write by admins or owner artist
@@ -182,8 +188,14 @@ service cloud.firestore {
       allow create: if isSignedIn() && isValidBooking(incoming()) && incoming().status == 'pending';
       allow update: if (isOwner(existing().artistId) || isAdmin()) && 
                       incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
-                      incoming().status in ['confirmed', 'completed', 'cancelled'];
+                      incoming().status in ['approved', 'rejected', 'confirmed', 'completed', 'cancelled'];
       allow delete: if isAdmin();
+    }
+
+    // Platform Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSettings(incoming());
     }
   }
 }

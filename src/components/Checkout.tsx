@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { CreditCard, ShieldCheck, ArrowLeft, CheckCircle, Smartphone, Globe } from 'lucide-react';
 import { auth } from '../lib/firebase';
+import { formatPrice } from '../lib/currency';
 
 interface CheckoutProps {
   artwork: {
@@ -12,11 +13,12 @@ interface CheckoutProps {
     price: string;
     image: string;
   };
+  currencyCode?: string;
   onBack: () => void;
   onSuccess: () => void;
 }
 
-export default function Checkout({ artwork, onBack, onSuccess }: CheckoutProps) {
+export default function Checkout({ artwork, currencyCode = 'USD', onBack, onSuccess }: CheckoutProps) {
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet' | 'mobile_money' | 'paypal'>('card');
 
@@ -33,6 +35,7 @@ export default function Checkout({ artwork, onBack, onSuccess }: CheckoutProps) 
           artist: artwork.artist, 
           artistId: artwork.artistId,
           price: artwork.price,
+          currencyCode,
           userId: auth.currentUser?.uid,
           userEmail: auth.currentUser?.email
         })
@@ -53,6 +56,8 @@ export default function Checkout({ artwork, onBack, onSuccess }: CheckoutProps) 
       alert('Payment processing failed. Please try again.');
     }
   };
+
+  const currentPriceFormatted = formatPrice(artwork.price, currencyCode);
 
   return (
     <motion.div 
@@ -90,15 +95,15 @@ export default function Checkout({ artwork, onBack, onSuccess }: CheckoutProps) 
           <div className="space-y-4 pt-8 border-t border-gray-100 font-medium">
             <div className="flex justify-between text-gray-500">
               <span>Subtotal</span>
-              <span className="text-slate-900">${artwork.price}</span>
+              <span className="text-slate-900">{currentPriceFormatted}</span>
             </div>
             <div className="flex justify-between text-gray-500">
               <span>Platform Service Fee (Included)</span>
-              <span className="text-slate-900">$0.00</span>
+              <span className="text-slate-900">{formatPrice('0', currencyCode)}</span>
             </div>
             <div className="flex justify-between text-xl font-bold pt-4 text-slate-900 border-t border-dashed border-gray-200">
               <span>Total</span>
-              <span className="text-brand-blue">${artwork.price}</span>
+              <span className="text-brand-blue">{currentPriceFormatted}</span>
             </div>
           </div>
         </div>
@@ -220,7 +225,7 @@ export default function Checkout({ artwork, onBack, onSuccess }: CheckoutProps) 
                     <span>Processing Secure Connection...</span>
                   </span>
                 ) : (
-                  <span>Acquire Masterpiece — ${artwork.price}</span>
+                  <span>Acquire Masterpiece — {currentPriceFormatted}</span>
                 )}
               </button>
               

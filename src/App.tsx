@@ -11,6 +11,7 @@ import {
   where 
 } from 'firebase/firestore';
 import { auth, db, signIn, signOutUser, handleFirestoreError, OperationType } from './lib/firebase';
+import { CURRENCY_RATES, formatPrice } from './lib/currency';
 import { 
   LogOut,
   Search,
@@ -37,18 +38,18 @@ interface Artwork {
 }
 
 const MOCK_ARTWORKS = [
-  { id: '1', title: "Neon Silence", artist: "Kojo Mensah", price: "1,200", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
+  { id: '1', title: "Neon Silence", artist: "Kojo Mensah", price: "1200", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
   { id: '2', title: "Ethereal Flow", artist: "Sarah Chen", price: "850", image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800", medium: "Traditional Painting" },
-  { id: '3', title: "Urban Pulse", artist: "David R.", price: "2,400", image: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800", medium: "Photography" },
+  { id: '3', title: "Urban Pulse", artist: "David R.", price: "2400", image: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800", medium: "Photography" },
   { id: '4', title: "Digital Soul", artist: "Elena Rossi", price: "400", image: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
-  { id: '5', title: "Liquid Dreams", artist: "Marcus Thorne", price: "1,800", image: "https://images.unsplash.com/photo-1547891124-4d22f02c6707?auto=format&fit=crop&q=80&w=800", medium: "Acrylic Painting" },
+  { id: '5', title: "Liquid Dreams", artist: "Marcus Thorne", price: "1800", image: "https://images.unsplash.com/photo-1547891124-4d22f02c6707?auto=format&fit=crop&q=80&w=800", medium: "Acrylic Painting" },
   { id: '6', title: "Concrete Jungle", artist: "Lisa Wang", price: "950", image: "https://images.unsplash.com/photo-1493119508027-2b584f234d6c?auto=format&fit=crop&q=80&w=800", medium: "Photography" },
-  { id: '7', title: "Golden Hour", artist: "James Miller", price: "3,200", image: "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&q=80&w=800", medium: "Oil Painting" },
-  { id: '8', title: "Midnight Jazz", artist: "Sufiya K.", price: "1,500", image: "https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800", medium: "Contemporary Arts" },
+  { id: '7', title: "Golden Hour", artist: "James Miller", price: "3200", image: "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&q=80&w=800", medium: "Oil Painting" },
+  { id: '8', title: "Midnight Jazz", artist: "Sufiya K.", price: "1500", image: "https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800", medium: "Contemporary Arts" },
   { id: '9', title: "Whispers of Oak", artist: "Thomas Reed", price: "600", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800", medium: "Pencil Art" },
-  { id: '10', title: "Crimson Bloom", artist: "Isabella Cruz", price: "1,100", image: "https://images.unsplash.com/photo-1459908676235-d5f02a50184b?auto=format&fit=crop&q=80&w=800", medium: "Pastel Art" },
-  { id: '11', title: "Virtual Horizon", artist: "Alex Rivera", price: "2,000", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
-  { id: '12', title: "The Architect", artist: "Sofia Dupont", price: "4,500", image: "https://images.unsplash.com/photo-1508898578281-774ac4893c0c?auto=format&fit=crop&q=80&w=800", medium: "Contemporary Arts" },
+  { id: '10', title: "Crimson Bloom", artist: "Isabella Cruz", price: "1100", image: "https://images.unsplash.com/photo-1459908676235-d5f02a50184b?auto=format&fit=crop&q=80&w=800", medium: "Pastel Art" },
+  { id: '11', title: "Virtual Horizon", artist: "Alex Rivera", price: "2000", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
+  { id: '12', title: "The Architect", artist: "Sofia Dupont", price: "4500", image: "https://images.unsplash.com/photo-1508898578281-774ac4893c0c?auto=format&fit=crop&q=80&w=800", medium: "Contemporary Arts" },
 ];
 
 export default function App() {
@@ -63,6 +64,21 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [currency, setCurrency] = useState('USD');
+
+  useEffect(() => {
+    // Fetch currency from platform settings
+    const fetchSettings = async () => {
+      try {
+        const settingsSnapshot = await getDocs(collection(db, 'settings'));
+        const currencySetting = settingsSnapshot.docs.find(d => d.id === 'platform')?.data()?.currency;
+        if (currencySetting) setCurrency(currencySetting);
+      } catch (e) {
+        console.error('Error fetching settings', e);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   // Deep Navigation Hash Listener
   useEffect(() => {
@@ -294,6 +310,7 @@ export default function App() {
                           artistId={artistId}
                           price={price}
                           image={image}
+                          currencyCode={currency}
                           onArtistClick={(id, name) => {
                             setSelectedArtist({ id, name });
                             setView('artist-profile');
@@ -326,6 +343,7 @@ export default function App() {
           <ArtistProfile 
             artistId={selectedArtist.id} 
             artistName={selectedArtist.name}
+            currencyCode={currency}
             onBack={() => setView('gallery')}
             onBuy={(art) => {
               if (!user) {
@@ -347,6 +365,7 @@ export default function App() {
         ) : view === 'checkout' && selectedArtwork ? (
           <Checkout 
             artwork={selectedArtwork} 
+            currencyCode={currency}
             onBack={() => setView('gallery')}
             onSuccess={() => {
               alert(`Congratulations! You have successfully acquired "${selectedArtwork.title}".`);
