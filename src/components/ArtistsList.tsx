@@ -164,7 +164,12 @@ export default function ArtistsList({ onArtistClick, onBrowseGallery }: ArtistsL
                 <div>
                   <div className="w-16 h-16 rounded-2xl bg-brand-blue/10 flex items-center justify-center text-brand-blue font-bold text-2xl mb-6 overflow-hidden">
                     {artist.photoURL ? (
-                      <img src={artist.photoURL} alt={artist.displayName} className="w-full h-full object-cover" />
+                      <img 
+                        src={artist.photoURL} 
+                        alt={artist.displayName} 
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover" 
+                      />
                     ) : (
                       <span>{artist.displayName[0]}</span>
                     )}
@@ -202,6 +207,7 @@ export default function ArtistsList({ onArtistClick, onBrowseGallery }: ArtistsL
                         <img 
                           src={work.image} 
                           alt={work.title} 
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/work:opacity-100 transition-opacity flex items-end p-4">

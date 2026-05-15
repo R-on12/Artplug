@@ -81,7 +81,12 @@ export default function Checkout({ artwork, currencyCode = 'USD', onBack, onSucc
           
           <div className="flex gap-6 mb-8">
             <div className="w-32 aspect-[4/5] rounded-xl overflow-hidden shadow-md">
-              <img src={artwork.image} alt={artwork.title} className="w-full h-full object-cover" />
+              <img 
+                src={artwork.image} 
+                alt={artwork.title} 
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div>
               <h3 className="text-2xl font-display font-black text-slate-900">{artwork.title}</h3>

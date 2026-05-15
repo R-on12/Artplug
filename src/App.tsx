@@ -42,7 +42,7 @@ const MOCK_ARTWORKS = [
   { id: '2', title: "Ethereal Flow", artist: "Sarah Chen", price: "850", image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800", medium: "Traditional Painting" },
   { id: '3', title: "Urban Pulse", artist: "David R.", price: "2400", image: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800", medium: "Photography" },
   { id: '4', title: "Digital Soul", artist: "Elena Rossi", price: "400", image: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=800", medium: "Digital Painting" },
-  { id: '5', title: "Liquid Dreams", artist: "Marcus Thorne", price: "1800", image: "https://images.unsplash.com/photo-1547891124-4d22f02c6707?auto=format&fit=crop&q=80&w=800", medium: "Acrylic Painting" },
+  { id: '5', title: "Liquid Dreams", artist: "Marcus Thorne", price: "1800", image: "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800", medium: "Acrylic Painting" },
   { id: '6', title: "Concrete Jungle", artist: "Lisa Wang", price: "950", image: "https://images.unsplash.com/photo-1493119508027-2b584f234d6c?auto=format&fit=crop&q=80&w=800", medium: "Photography" },
   { id: '7', title: "Golden Hour", artist: "James Miller", price: "3200", image: "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&q=80&w=800", medium: "Oil Painting" },
   { id: '8', title: "Midnight Jazz", artist: "Sufiya K.", price: "1500", image: "https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800", medium: "Contemporary Arts" },

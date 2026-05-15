@@ -35,6 +35,7 @@ const ArtCard: React.FC<ArtCardProps> = ({ id, title, artist, artistId, isVerifi
         <motion.img 
           src={image} 
           alt={title} 
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover"
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}

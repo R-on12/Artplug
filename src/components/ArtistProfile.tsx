@@ -296,7 +296,12 @@ export default function ArtistProfile({ artistId, artistName, currencyCode = 'US
                 onClick={() => isSelf && (window.location.hash = '#studio')}
                 className={`w-32 h-32 md:w-48 md:h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl flex-shrink-0 ${isSelf ? 'cursor-pointer hover:ring-4 hover:ring-brand-blue/30 transition-all' : ''}`}
               >
-                <img src={artistProfile.photoURL} alt={artistName} className="w-full h-full object-cover" />
+                <img 
+                  src={artistProfile.photoURL} 
+                  alt={artistName} 
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover" 
+                />
                 {isSelf && (
                   <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
                     <span className="text-white text-[10px] font-black uppercase tracking-widest">Update Photo</span>
