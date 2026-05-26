@@ -538,7 +538,7 @@ export default function ArtistDashboard() {
                         <option>Pencil Art</option>
                         <option>Pastel Art</option>
                         <option>Water colour Art</option>
-                        <option>Acrylic Painting</option>
+                        <option>Digital Illustration</option>
                         <option>Oil Painting</option>
                         <option>Digital Painting</option>
                         <option>Contemporary Arts</option>
