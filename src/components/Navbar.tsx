@@ -47,22 +47,6 @@ export default function Navbar({ setView, currentView, user, isArtist, onLogin, 
         </div>
         <div className="relative group-hover:drop-shadow-sm transition-all">
           <span>ARTPLUG<span className="text-brand-blue">.</span></span>
-          {/* Artistic Paint Stroke passing through the text */}
-          <motion.div 
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ 
-              scaleX: [0, 1, 1, 0],
-              opacity: [0, 0.4, 0.4, 0],
-              x: [-60, -20, 20, 60],
-              backgroundColor: ["#3b82f6", "#8b5cf6", "#ec4899", "#ef4444", "#3b82f6"]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute bottom-1 left-0 w-[120%] h-2 rounded-full origin-left blur-[3px] opacity-30 pointer-events-none -z-10"
-          />
         </div>
       </motion.div>
       
